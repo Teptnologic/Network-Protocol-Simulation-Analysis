@@ -1,24 +1,26 @@
 import queue
 import event
+import random
+from math import log
 
-# MAXBUFFER = int(input("Please enter the MAXBUFFER size for the packets queue: "))
-# service_rate = int(input("Please enter the service rate: "))
-# arrival_rate = int(input("Please enter the arrival rate: "))
-
-def generate_service_time():
-    return 5
-def generate_offset_time():
-    return 5
 # initialize
+# MAXBUFFER = int(input("Please enter the MAXBUFFER size for the packets queue: "))
+# rate = int(input("Please enter the service rate: "))
 event_type = {"a":"arrival","d":"departure"}
 MAXBUFFER = 20
 event_id = 0
-service_rate = 1
-arrival_rate = 1
 time = 0
 packets_queue_length = 0
 packets_queue = queue.Queue()
 global_event_list = queue.PriorityQueue()
+rate = 1
+
+def generate_arrival_rate():
+    u = random.random()
+    return ((-1/rate)*log(1-u));
+def generate_offset_time():
+    u = random.random()
+    return ((-1/rate)*log(1-u));
 
 # statistics
 server_busy_time = 0
@@ -35,6 +37,7 @@ global_event_list.put(event_time, event)
 for i in 100000:
     # 1. get the first event from the GEL;
     first_event = global_event_list.get()
+    # the first event is arrival event
     if first_event.event_type == event_type["a"]:
         # schedule the next arrival event
         time = event_time
@@ -55,6 +58,7 @@ for i in 100000:
                 # drop the packet; record a packet drop.
                 # Since this is a new arrival event, we increment the length.
                 # Update statistics which maintain the mean queue-length and the server busy time
+    # the first event is departure event
     else:
         # process-service-completion
         time = event_time
