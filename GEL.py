@@ -1,1 +1,3 @@
-class GEL(object):
+def insertGEL(list, event):
+
+def popGEL(list):
