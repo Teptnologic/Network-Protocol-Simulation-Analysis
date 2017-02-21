@@ -6,33 +6,35 @@ from math import log
 # initialize
 # MAXBUFFER = int(input("Please enter the MAXBUFFER size for the packets queue: "))
 # rate = int(input("Please enter the service rate: "))
-event_type = {"a":"arrival","d":"departure"}
 MAXBUFFER = 20
+rate = 1
+event_type = {"a":"arrival","d":"departure"}
 event_id = 0
 time = 0
 packets_queue_length = 0
 packets_queue = queue.Queue()
-global_event_list = queue.PriorityQueue()
-rate = 1
 
 def generate_arrival_rate():
     u = random.random()
     return ((-1/rate)*log(1-u));
-def generate_offset_time():
+def generate_service_rate():
     u = random.random()
     return ((-1/rate)*log(1-u));
 
+# create new event and insert into GEL
+event_time = time + generate_service_rate()
+event = Event(event_time,event_type["a"],None,None)
+# double link list
+global_event_list = event
+
+def insertGEL(first_event,new_event):
+    return 0
+
 # statistics
 server_busy_time = 0
-queue_length_sum = 0
+packets_queue_length_sum = 0
 packets_count = 0
 packets_drop = 0
-
-# create new event and insert into GEL
-event_time = time + generate_offset_time()
-event = Event(event_time,event_type["a"],event_id)
-event_id += 1
-global_event_list.put(event_time, event)
 
 for i in 100000:
     # 1. get the first event from the GEL;
@@ -41,10 +43,9 @@ for i in 100000:
     if first_event.event_type == event_type["a"]:
         # schedule the next arrival event
         time = event_time
-        event_time = time + generate_offset_time()
-        event = Event(event_time,event_type["a"],event_id)
-        event_id += 1
-        global_event_list.put(event_time, event)
+        event_time = time + generate_service_rate()
+        new_event = Event(event_time,event_type["a"],None,None)
+        insertGEL(first_event,new_event)
         # process-arrival-event
         if packets_queue_length == 0:
             # Get the service time of the packet.
