@@ -28,7 +28,15 @@ event = Event(event_time,event_type["a"],None,None)
 global_event_list = event
 
 def insertGEL(first_event,new_event):
-    return 0
+    if (new_event.event_time > first_event.event_time):
+        if first_event.next_event == None:
+            first_event.next_event = new_event
+            new_event.prev_event = first_event
+        elif new_event.event_time < first_event.next_event.event_time:
+            first_event.next_event.next_event = new_event
+            new_event.prev_event = first_event.next_event
+        else:
+            insertGEL(first_event.next_event, new_event)
 
 # statistics
 server_busy_time = 0
@@ -38,7 +46,9 @@ packets_drop = 0
 
 for i in 100000:
     # 1. get the first event from the GEL;
-    first_event = global_event_list.get()
+    first_event = global_event_list
+    first_event.next_event.prev_event = None
+    global_event_list = first_event.next_event
     # the first event is arrival event
     if first_event.event_type == event_type["a"]:
         # schedule the next arrival event
