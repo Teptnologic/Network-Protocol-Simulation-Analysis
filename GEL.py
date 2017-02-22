@@ -31,7 +31,7 @@ def scheduleNextArrival(global_event_list, arrival_time, service_time, current_t
     global_event_list = insertGEL(global_event_list,new_event)
     return global_event_list
 
-def scheduleNextDeparture(global_event_list, packet, service_time, current_time):
-    new_event = event.Event(current_time + service_time, packet, event_type["d"], None, None)
+def scheduleNextDeparture(global_event_list, packet, process_time, current_time):
+    new_event = event.Event(current_time + process_time, packet, event_type["d"], None, None)
     global_event_list = insertGEL(global_event_list,new_event)
     return global_event_list
