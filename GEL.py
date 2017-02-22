@@ -7,7 +7,7 @@ def insertGEL(global_event_list, new_event):
     else:
         event = global_event_list
         next_event = event.next_event
-        while next_event != None || new_event.event_time > next_event.event_time:
+        while next_event != None or new_event.event_time > next_event.event_time:
             event = event.next_event
             next_event = event.next_event
         event.next_event = new_event
