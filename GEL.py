@@ -19,15 +19,22 @@ def insertGEL(global_event_list, new_event):
 
 def popGEL(global_event_list):
     first_event = global_event_list
-    first_event.next_event.prev_event = None
+    if first_event.next_event != None:
+        first_event.next_event.prev_event = None
     global_event_list = first_event.next_event
     return first_event
 
+event_type = {"a":"arrival","d":"departure"}
+
 def scheduleNextArrival(global_event_list, arrival_time, service_time, current_time):
-    new_packet = Packet(service_time)
-    new_event = Event(current_time + arrival_time, new_packet, event_type["a"], None, None)
+    new_packet = packet.Packet(service_time)
+    new_event = event.Event(current_time + arrival_time, new_packet, event_type["a"], None, None)
     insertGEL(global_event_list,new_event)
+    print("insert arrival event")
+    return global_event_list
 
 def scheduleNextDeparture(global_event_list, packet, service_time, current_time):
     new_event = Event(current_time + service_time, packet, event_type["d"], None, None)
     insertGEL(global_event_list,new_event)
+    print("insert departure event")
+    return global_event_list

@@ -29,14 +29,14 @@ packets_queue_length_sum = 0
 packets_count = 0
 packets_drop = 0
 
-scheduleNextArrival(global_event_list, generate_service_rate(), generate_arrival_rate(), current_time)
+global_event_list = GEL.scheduleNextArrival(global_event_list, generate_service_rate(), generate_arrival_rate(), current_time)
 
-for i in 100000:
+for i in range(100000):
     # 1. get the first event from the GEL;
-    first_event = popGEL(global_event_list)
+    first_event = GEL.popGEL(global_event_list)
     current_time = first_event.event_time
     # the first event is arrival event
-    if first_event.event_type == event_type["a"]:
+    if first_event.event_type == "arrival":
         # schedule the next arrival event
         scheduleNext(global_event_list, generate_arrival_rate(), generate_service_rate(), current_time)
         # process-arrival-event
@@ -46,7 +46,7 @@ for i in 100000:
             service_time = time + generate_service_rate()
             # Create a departure event at time which is equal to the current time plus the service time of the packet.
             # Insert Event
-            scheduleNextDeparture(global_event_list, first_event.packet, service_time, current_time)
+            global_event_list = GEL.scheduleNextDeparture(global_event_list, first_event.packet, service_time, current_time)
         # Queue is full
         elif packets_queue.full():
             # drop the packet; record a packet drop.
@@ -75,6 +75,6 @@ for i in 100000:
         if not packets_queue.empty():
             # Dequeue the first packet from the buffer;
             packet = packets_queue.get()
-            scheduleNextDeparture(global_event_list, packet, packet.transmit_time, current_time)
+            global_event_list = GEL.scheduleNextDeparture(global_event_list, packet, packet.transmit_time, current_time)
             # Create a new departure event for a time which is the current time plus the time to transmit the packet.
             # Insert the event at the right place in the GEL.
