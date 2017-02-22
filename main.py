@@ -1,6 +1,9 @@
-import queue
 import event
+import packet
+import GEL
+
 import random
+import queue
 from math import log
 
 # initialize
@@ -8,11 +11,10 @@ from math import log
 # rate = int(input("Please enter the service rate: "))
 MAXBUFFER = 20
 rate = 1
-event_type = {"a":"arrival","d":"departure"}
-event_id = 0
-time = 0
+current_time = 0
 packets_queue_length = 0
-packets_queue = queue.Queue()
+packets_queue = queue.Queue(MAXBUFFER)
+global_event_list = None
 
 def generate_arrival_rate():
     u = random.random()
@@ -21,60 +23,57 @@ def generate_service_rate():
     u = random.random()
     return ((-1/rate)*log(1-u));
 
-# create new event and insert into GEL
-event_time = time + generate_service_rate()
-event = Event(event_time,event_type["a"],None,None)
-# double link list
-global_event_list = event
-
-def insertGEL(first_event,new_event):
-    if (new_event.event_time > first_event.event_time):
-        if first_event.next_event == None:
-            first_event.next_event = new_event
-            new_event.prev_event = first_event
-        elif new_event.event_time < first_event.next_event.event_time:
-            first_event.next_event.next_event = new_event
-            new_event.prev_event = first_event.next_event
-        else:
-            insertGEL(first_event.next_event, new_event)
-
 # statistics
 server_busy_time = 0
 packets_queue_length_sum = 0
 packets_count = 0
 packets_drop = 0
 
+scheduleNext(global_event_list, generate_service_rate(), generate_arrival_rate(), current_time)
+
 for i in 100000:
     # 1. get the first event from the GEL;
-    first_event = global_event_list
-    first_event.next_event.prev_event = None
-    global_event_list = first_event.next_event
+    first_event = popGEL(global_event_list)
     # the first event is arrival event
     if first_event.event_type == event_type["a"]:
+        # Set current time to be the event time.
+        current_time = first_event.event_time
         # schedule the next arrival event
-        time = event_time
-        event_time = time + generate_service_rate()
-        new_event = Event(event_time,event_type["a"],None,None)
-        insertGEL(first_event,new_event)
+        scheduleNext(global_event_list, generate_arrival_rate(), generate_service_rate(), current_time)
         # process-arrival-event
-        if packets_queue_length == 0:
+        # Queue is empty
+        if packets_queue.empty():
             # Get the service time of the packet.
+            service_time = time + generate_service_rate()
             # Create a departure event at time which is equal to the current time plus the service time of the packet.
             # Insert Event
+            scheduleNextDeparture(global_event_list, first_event.packet, service_time, current_time)
+        # Queue is full
+        elif packets_queue.full():
+            # drop the packet; record a packet drop.
+            packets_drop += 1
+            # Since this is a new arrival event, we increment the length.
+            packets_queue_length += 1
+            # Update statistics which maintain the mean queue-length and the server busy time
+            # TODO: server busy time
+            packets_queue_length_sum += packets_queue_length
+            packets_count += 1
         else:
-            if packets_queue_length - 1 < MAXBUFFER:
-                #  Put the packet into the queue
-            else:
-                # Queue is full
-                # drop the packet; record a packet drop.
-                # Since this is a new arrival event, we increment the length.
-                # Update statistics which maintain the mean queue-length and the server busy time
+            #  Put the packet into the queue
+            packets_queue.put(first_event.packet)
+            # Since this is a new arrival event, we increment the length.
+            packets_queue_length += 1
+            # Update statistics which maintain the mean queue-length and the
+            # TODO: server busy time
+            packets_queue_length_sum += packets_queue_length
+            packets_count += 1
     # the first event is departure event
     else:
         # process-service-completion
-        time = event_time
+        current_time = first_event.event_time
         # Update statistics which maintain the mean queue-length and the server busy time
         # Since this is a packet departure, we decrement the length.
+        packets_queue_length -= 1
         if packets_queue_length > 0:
             # Dequeue the first packet from the buffer;
             # Create a new departure event for a time which is the current time plus the time to transmit the packet.
