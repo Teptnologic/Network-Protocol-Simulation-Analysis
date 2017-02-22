@@ -51,23 +51,25 @@ for i in range(100000):
             # Create a departure event at time which is equal to the current time plus the service time of the packet.
             # Insert Event
             packets_queue.put(first_event.packet)
-            packets_queue_length += 1
             global_event_list = GEL.scheduleNextDeparture(global_event_list, first_event.packet, service_time, current_time)
+            packets_queue_length_sum += packets_queue_length
+            packets_count += 1
+            packets_queue_length += 1
         # Queue is full
         elif packets_queue.full():
             # drop the packet; record a packet drop.
             packets_drop += 1
             # Since this is a new arrival event, we increment the length.
-            packets_queue_length += 1
             # Update statistics which maintain the mean queue-length and the server busy time
             server_busy_time_start = current_time
             packets_queue_length_sum += packets_queue_length
             packets_count += 1
+            packets_queue_length += 1
         else:
             #  Put the packet into the queue
             packets_queue.put(first_event.packet)
             # Since this is a new arrival event, we increment the length.
-            packets_queue_length += 1
+            # packets_queue_length += 1
             # Update statistics which maintain the mean queue-length and the
             packets_queue_length_sum += packets_queue_length
             packets_count += 1
@@ -76,10 +78,10 @@ for i in range(100000):
         # process-service-completion
         # Update statistics which maintain the mean queue-length and the server busy time
         # Since this is a packet departure, we decrement the length.
-        packets_queue_length -= 1
         if not packets_queue.empty():
             # Dequeue the first packet from the buffer;
             packet = packets_queue.get()
+            packets_queue_length -= 1
             if server_busy_time_start > 0:
                 server_busy_time += (current_time - server_busy_time_start)
                 server_busy_time_start = 0
