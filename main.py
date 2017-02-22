@@ -38,12 +38,12 @@ for i in range(100000):
     # the first event is arrival event
     if first_event.event_type == "arrival":
         # schedule the next arrival event
-        scheduleNext(global_event_list, generate_arrival_rate(), generate_service_rate(), current_time)
+        global_event_list = GEL.scheduleNextArrival(global_event_list, generate_arrival_rate(), generate_service_rate(), current_time)
         # process-arrival-event
         # Queue is empty
         if packets_queue.empty():
             # Get the service time of the packet.
-            service_time = time + generate_service_rate()
+            service_time = current_time + generate_service_rate()
             # Create a departure event at time which is equal to the current time plus the service time of the packet.
             # Insert Event
             global_event_list = GEL.scheduleNextDeparture(global_event_list, first_event.packet, service_time, current_time)
