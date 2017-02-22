@@ -8,8 +8,8 @@ import packet
 
 # configurations
 MAXBUFFER = int(input("Please enter the MAXBUFFER size for the packets queue: "))
-service_rate = int(input("Please enter the service rate: "))
-arrival_rate = int(input("Please enter the arrival rate: "))
+service_rate = float(input("Please enter the service rate: "))
+arrival_rate = float(input("Please enter the arrival rate: "))
 
 def generate_arrival_time():
     u = random.random()
