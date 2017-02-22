@@ -12,7 +12,7 @@ from math import log
 # arrival_rate = int(input("Please enter the arrival rate: "))
 MAXBUFFER = 1
 service_rate = 1
-arrival_rate = 0.9
+arrival_rate = 0.1
 current_time = 0
 packets_queue_length = 0
 packets_queue = queue.Queue(MAXBUFFER)
@@ -45,15 +45,16 @@ for i in range(100000):
         global_event_list = GEL.scheduleNextArrival(global_event_list, generate_arrival_time(), generate_service_time(), current_time)
         # process-arrival-event
         # Queue is empty
-        if packets_queue_length == 0:
+        if packets_queue.empty():
             # Get the service time of the packet.
             service_time = first_event.packet.service_time
             # Create a departure event at time which is equal to the current time plus the service time of the packet.
             # Insert Event
+            packets_queue.put(first_event.packet)
             packets_queue_length += 1
             global_event_list = GEL.scheduleNextDeparture(global_event_list, first_event.packet, service_time, current_time)
         # Queue is full
-        elif packets_queue_length > MAXBUFFER:
+        elif packets_queue.full():
             # drop the packet; record a packet drop.
             packets_drop += 1
             # Since this is a new arrival event, we increment the length.
@@ -80,7 +81,7 @@ for i in range(100000):
             # Dequeue the first packet from the buffer;
             packet = packets_queue.get()
             if server_busy_time_start > 0:
-                server_busy_time += current_time - server_busy_time_start
+                server_busy_time += (current_time - server_busy_time_start)
                 server_busy_time_start = 0
             # Create a new departure event for a time which is the current time plus the time to transmit the packet.
             # Insert the event at the right place in the GEL.
