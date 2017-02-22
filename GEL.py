@@ -21,7 +21,7 @@ def popGEL(global_event_list):
     if first_event.next_event != None:
         first_event.next_event.prev_event = None
     global_event_list = first_event.next_event
-    return first_event
+    return (first_event, global_event_list)
 
 event_type = {"a":"arrival","d":"departure"}
 

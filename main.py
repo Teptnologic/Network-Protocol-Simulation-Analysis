@@ -36,7 +36,7 @@ global_event_list = GEL.scheduleNextArrival(global_event_list, generate_service_
 for i in range(100000):
     print(current_time)
     # 1. get the first event from the GEL;
-    first_event = GEL.popGEL(global_event_list)
+    (first_event, global_event_list) = GEL.popGEL(global_event_list)
     current_time = first_event.event_time
     # the first event is arrival event
     if first_event.event_type == "arrival":
