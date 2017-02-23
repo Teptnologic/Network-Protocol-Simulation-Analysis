@@ -14,7 +14,12 @@ class GEL(object):
             self.head = new_event
             return None
         iterator = self.head
-        while iterator.next != None and new_event.time > iterator.next.time:
+        if iterator.time > new_event.time:
+            self.head = new_event
+            new_event.next = iterator
+            iterator.prev = new_event
+            return new_event
+        while (iterator.next != None) and (new_event.time > iterator.next.time):
             iterator = iterator.next
         new_event.prev = iterator
         new_event.next = iterator.next
