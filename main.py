@@ -11,12 +11,12 @@ MAXBUFFER = int(input("Please enter the MAXBUFFER size for the packets queue: ")
 service_rate = float(input("Please enter the service rate: "))
 arrival_rate = float(input("Please enter the arrival rate: "))
 
-def generate_ec_arrival_time():
-    u = random.random()
-    return (u * exp(arrival_rate))
+# def generate_arrival_time():
+#     u = random.random()
+#     return ((-1 / arrival_rate) * log(1 - u))
 def generate_arrival_time():
     u = random.random()
-    return ((-1 / arrival_rate) * log(1 - u))
+    return (u * exp(arrival_rate))
 def generate_service_time():
     u = random.random()
     return ((-1 / service_rate) * log(1 - u))
@@ -48,10 +48,10 @@ for i in range(100000):
     if event.type == "arrival":
         event_list.schedule("arrival", current_time + generate_arrival_time(), generate_packet())
         if total_active_packets == 0:
-            event_list.schedule("departure", current_time + event.packet.service_time, event.packet)
             total_active_packets_length += total_active_packets
             total_packet_queue_length += packet_queue.qsize()
             total_packets += 1
+            event_list.schedule("departure", current_time + event.packet.service_time, event.packet)
             total_active_packets += 1
             if server_busy_start_time == -1:
                 server_busy_start_time = current_time
