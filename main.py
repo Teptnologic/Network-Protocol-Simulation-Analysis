@@ -1,4 +1,4 @@
-from math import log
+from math import log, exp
 import random
 import queue
 
@@ -11,6 +11,9 @@ MAXBUFFER = int(input("Please enter the MAXBUFFER size for the packets queue: ")
 service_rate = float(input("Please enter the service rate: "))
 arrival_rate = float(input("Please enter the arrival rate: "))
 
+def generate_ec_arrival_time():
+    u = random.random()
+    return (u * exp(arrival_rate))
 def generate_arrival_time():
     u = random.random()
     return ((-1 / arrival_rate) * log(1 - u))
@@ -22,6 +25,7 @@ def generate_packet():
 
 # statistics
 total_server_busy_time = 0
+total_active_packets_length = 0
 total_packet_queue_length = 0
 total_packets = 0
 total_active_packets = 0
@@ -42,15 +46,19 @@ for i in range(100000):
     current_time = event.time
     # print(event.time)
     if event.type == "arrival":
-        total_packet_queue_length += total_active_packets
-        total_packets += 1
         event_list.schedule("arrival", current_time + generate_arrival_time(), generate_packet())
         if total_active_packets == 0:
             event_list.schedule("departure", current_time + event.packet.service_time, event.packet)
+            total_active_packets_length += total_active_packets
+            total_packet_queue_length += packet_queue.qsize()
+            total_packets += 1
             total_active_packets += 1
             if server_busy_start_time == -1:
                 server_busy_start_time = current_time
         elif (total_active_packets < MAXBUFFER + 1) or (MAXBUFFER == 0):
+            total_active_packets_length += total_active_packets
+            total_packet_queue_length += packet_queue.qsize()
+            total_packets += 1
             packet_queue.put(event.packet)
             total_active_packets += 1
         else:
@@ -72,8 +80,12 @@ if server_busy_start_time != -1:
 print("--------------------------------------")
 print("Server utilization:", end=' ')
 print(total_server_busy_time / current_time)
-print("Average queue length:", end=' ')
+print("Average active packets length:", end=' ')
+print(total_active_packets_length / total_packets)
+print("Average packets queue length:", end=' ')
 print(total_packet_queue_length / total_packets)
 print("Packet drop rate:", end=' ')
 print(total_dropped_packets / total_packets)
+print("Total Packet dropped:", end=' ')
+print(total_dropped_packets)
 print("--------------------------------------")
