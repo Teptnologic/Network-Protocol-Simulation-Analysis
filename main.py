@@ -11,12 +11,11 @@ MAXBUFFER = int(input("Please enter the MAXBUFFER size for the packets queue: ")
 service_rate = float(input("Please enter the service rate: "))
 arrival_rate = float(input("Please enter the arrival rate: "))
 
-# def generate_arrival_time():
-#     u = random.random()
-#     return ((-1 / arrival_rate) * log(1 - u))
 def generate_arrival_time():
     u = random.random()
-    return (u * exp(arrival_rate))
+    a = ((-1 / arrival_rate) * log(1 - u))
+    return(1 * exp(a))
+    # return a
 def generate_service_time():
     u = random.random()
     return ((-1 / service_rate) * log(1 - u))
